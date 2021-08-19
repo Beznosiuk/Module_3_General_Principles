@@ -4,38 +4,37 @@ import com.epam.engx.cleancode.comments.task1.thirdpartyjar.InvalidInputExceptio
 
 public class MortgageInstallmentCalculator {
 
+    public static final double NUMBER_OF_MONTH = 12;
+    public static final double ZERO_VALUE = 0;
+
     /**
-     *
-     * @param p principal amount
-     * @param t term of mortgage in years
-     * @param r rate of interest
+     * @param loanAmount   principal amount
+     * @param termDuration term of mortgage in years
+     * @param rate         rate of interest
      * @return monthly payment amount
      */
-    public static double calculateMonthlyPayment(
-            int p, int t, double r) {
+    public static double calculateMonthlyPayment(int loanAmount, int termDuration, double rate) {
 
-        //cannot have negative loanAmount, term duration and rate of interest
-        if (p < 0 || t <= 0 || r < 0) {
+        if (isInvalidInputData(loanAmount, termDuration, rate)) {
             throw new InvalidInputException("Negative values are not allowed");
+        } else {
+            rate /= 100.0;
+            return calculateMonthlyPaymentAmount(loanAmount, termDuration, rate);
         }
+    }
 
-        // Convert interest rate into a decimal - eg. 6.5% = 0.065
-        r /= 100.0;
+    private static boolean isInvalidInputData(int loanAmount, int termDuration, double rate) {
+        return loanAmount < ZERO_VALUE || termDuration <= ZERO_VALUE || rate < ZERO_VALUE;
+    }
 
-        // convert term in years to term in months
-        double tim = t * 12;
+    private static double calculateMonthlyPaymentAmount(double loanAmount, double termDuration, double rate) {
+        double monthlyRate = rate / NUMBER_OF_MONTH;
+        double termInMonth = termDuration * NUMBER_OF_MONTH;
 
-        //for zero interest rates
-        if(r==0)
-            return  p/tim;
-
-        // convert into monthly rate
-        double m = r / 12.0;
-
-        // Calculate the monthly payment
-        // The Math.pow() method is used calculate values raised to a power
-        double monthlyPayment = (p * m) / (1 - Math.pow(1 + m, -tim));
-
-        return monthlyPayment;
+        if (rate == ZERO_VALUE) {
+            return loanAmount / termInMonth;
+        } else {
+            return loanAmount * monthlyRate / (1 - Math.pow(1 + monthlyRate, -termInMonth));
+        }
     }
 }
