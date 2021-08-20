@@ -10,31 +10,35 @@ public class UserReportBuilder {
 
     private UserDao userDao;
 
-    public Double getUserTotalOrderAmount(String userId) {
-
-        if (userDao == null)
-            return null;
+    public Double getUserTotalOrderAmount(String userId) throws TechnicalErrorException {
+        if (userDao == null) {
+            throw new TechnicalErrorException();
+        }
 
         User user = userDao.getUser(userId);
-        if (user == null)
-            return -1.0;
+        if (user == null) {
+            throw new NoUserException();
+        }
 
         List<Order> orders = user.getAllOrders();
+        if (orders.isEmpty()) {
+            throw new NoOrderException();
+        }
 
-        if (orders.isEmpty())
-            return -2.0;
+        return getOrderSum(orders);
+    }
 
-        Double sum = 0.0;
+    private double getOrderSum(List<Order> orders)  throws TechnicalErrorException{
+        double sum = 0.0;
         for (Order order : orders) {
-
             if (order.isSubmitted()) {
                 Double total = order.total();
-                if (total < 0)
-                    return -3.0;
+                if (total < 0) {
+                    throw new OrderAmountException();
+                }
                 sum += total;
             }
         }
-
         return sum;
     }
 
